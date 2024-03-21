@@ -20,6 +20,7 @@ public static class MauiProgram
 				ButtonHandler.Mapper.ReplaceMapping<Button, IButtonHandler>(nameof(Button.ContentLayout), ButtonExtensions.MapContentLayout);
 				ButtonHandler.Mapper.ReplaceMapping<Button, IButtonHandler>(nameof(Button.Text), ButtonExtensions.MapText);
 #elif WINDOWS
+                ButtonHandler.Mapper.AppendToMapping<Button, IButtonHandler>(nameof(Button.ContentLayout), CustomButton.MapContentLayout);
 
                 ButtonHandler.PlatformViewFactory = (_) =>
                 {

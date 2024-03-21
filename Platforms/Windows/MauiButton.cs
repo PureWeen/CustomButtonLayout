@@ -13,6 +13,7 @@ using WVerticalAlignment = Microsoft.UI.Xaml.VerticalAlignment;
 using WHorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment;
 using Microsoft.Maui.Platform;
 using Microsoft.Maui;
+using Microsoft.Maui.Handlers;
 
 namespace CustomButtonLayout
 {
@@ -41,6 +42,11 @@ namespace CustomButtonLayout
 
     public class CustomButton : Microsoft.Maui.Platform.MauiButton
     {
+        public static void MapContentLayout(IButtonHandler handler, Microsoft.Maui.Controls.Button button)
+        {
+           
+        }
+
         public CustomButton()
         {
             Content = new DefaultMauiButtonContent();
@@ -79,6 +85,16 @@ namespace CustomButtonLayout
                 Stretch = Microsoft.UI.Xaml.Media.Stretch.None,
                 Margin = new WThickness(0),
                 Visibility = Microsoft.UI.Xaml.Visibility.Collapsed,
+            };
+
+            _image.ImageOpened += (x, y) =>
+            {
+                _image.Stretch = Microsoft.UI.Xaml.Media.Stretch.None;
+            };
+
+            _image.LayoutUpdated += (x, y) =>
+            {
+                _image.Stretch = Microsoft.UI.Xaml.Media.Stretch.None;
             };
 
             _textBlock = new TextBlock

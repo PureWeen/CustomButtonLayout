@@ -4,8 +4,9 @@
              x:Class="CustomButtonLayout.MainPage">
 
     <VerticalStackLayout>
-        <Button Text="Button" ImageSource="dotnet_bot.png" MinimumWidthRequest="1" MinimumHeightRequest="1" WidthRequest="100" HeightRequest="32" BackgroundColor="Gray" Padding="11,9,0,9" />
-        <Button Text="Button" ImageSource="dotnet_bot.png" MinimumWidthRequest="1" MinimumHeightRequest="1" WidthRequest="100" HeightRequest="32" BackgroundColor="Gray" />
+        <Button ImageSource="dotnet_bot.png" Text="Hi there" HeightRequest="100" WidthRequest="100"></Button>
+        <Button ImageSource="dotnet_bot.png" Text="Hi there"></Button>
+        <Button ImageSource="dotnet_bot.png" Text="Hi there" HeightRequest="500" WidthRequest="500"></Button>
     </VerticalStackLayout>
 
 </ContentPage>
