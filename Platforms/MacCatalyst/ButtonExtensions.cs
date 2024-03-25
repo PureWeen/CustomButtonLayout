@@ -6,6 +6,7 @@ using Microsoft.Maui.Controls.Internals;
 using UIKit;
 using static Microsoft.Maui.Controls.Button;
 using Microsoft.Maui.Handlers;
+using Microsoft.Maui.Platform;
 
 namespace CustomButtonLayout
 {
@@ -18,48 +19,17 @@ namespace CustomButtonLayout
 
 		public static void MapText(IButtonHandler handler, Button button)
 		{
-			Microsoft.Maui.Platform.ButtonExtensions.UpdateText(handler.PlatformView, button);
-			handler.UpdateValue(nameof(Button.ContentLayout));
+			var text = TextTransformUtilites.GetTransformedText(button.Text, button.TextTransform);
+			handler.PlatformView.SetTitle(text, UIControlState.Normal);
+			UpdateContentLayout(handler.PlatformView, button);
+		}
+
+		public static void MapPadding(IButtonHandler handler, Button button)
+		{
+			UpdatePadding(handler.PlatformView, button);
 		}
 
 		public const double AlmostZero = 0.00001;
-
-		public static void UpdatePadding(this UIButton platformButton, IButton button, Thickness? defaultPadding = null) =>
-			UpdatePadding(platformButton, button.Padding, defaultPadding);
-
-		public static void UpdatePadding(this UIButton platformButton, Thickness padding, Thickness? defaultPadding = null)
-		{
-			if (padding.IsNaN)
-				padding = defaultPadding ?? Thickness.Zero;
-
-			// top and bottom insets reset to a "default" if they are exactly 0
-			// however, internally they are floor-ed, so there is no actual fractions
-			var top = padding.Top;
-			if (top == 0.0)
-				top = AlmostZero;
-			var bottom = padding.Bottom;
-			if (bottom == 0.0)
-				bottom = AlmostZero;
-
-			if (OperatingSystem.IsIOSVersionAtLeast(15) && platformButton.Configuration is not null)
-			{
-				var config = platformButton.Configuration;
-				config.ContentInsets = new NSDirectionalEdgeInsets (
-					(float)top,
-					(float)padding.Left,
-					(float)bottom,
-					(float)padding.Right);
-				platformButton.Configuration = config;
-			}
-			else if (!OperatingSystem.IsIOSVersionAtLeast(15))
-			{
-				platformButton.ContentEdgeInsets = new UIEdgeInsets(
-					(float)top,
-					(float)padding.Left,
-					(float)bottom,
-					(float)padding.Right);
-			}
-		}
 
 		static CGRect GetTitleBoundingRect(this UIButton platformButton)
 		{
@@ -84,7 +54,7 @@ namespace CustomButtonLayout
 			double spacingVertical = 0;
 			double spacingHorizontal = 0;
 
-			if (button.ImageSource != null)
+			if (platformButton.Configuration is null && button.ImageSource != null)
 			{
 				if (button.ContentLayout.IsHorizontal())
 				{
@@ -135,6 +105,11 @@ namespace CustomButtonLayout
 
 			var image = platformButton.CurrentImage;
 
+			NSDirectionalRectEdge? originalContentMode = null;
+			if (config is UIButtonConfiguration)
+			{
+				originalContentMode = config.ImagePlacement;
+			}
 
 			// if the image is too large then we just position at the edge of the button
 			// depending on the position the user has picked
@@ -275,13 +250,11 @@ namespace CustomButtonLayout
 			else
 				platformButton.TitleLabel.Layer.Hidden = true;
 
-			if (OperatingSystem.IsIOSVersionAtLeast(15) && config is UIButtonConfiguration)
+			if (config is UIButtonConfiguration)
 			{
-				// If there is an image above or below the Title, the top and bottom insets will be updated and need to be redrawn.
+				// If there is an image above or below the Title, the button will need to be redrawn the first time.
 				if ((config.ImagePlacement == NSDirectionalRectEdge.Top || config.ImagePlacement == NSDirectionalRectEdge.Bottom)
-					&& ((button.Padding.IsNaN && config.ContentInsets == ConvertPaddingToInsets(ButtonHandler.DefaultPadding)) 
-						|| config.ContentInsets == ConvertPaddingToInsets(button.Padding)
-						|| (IsCloseToZero(config.ContentInsets) && button.Padding == Thickness.Zero)))
+					&& originalContentMode != config.ImagePlacement)
 				{
 					platformButton.UpdatePadding(button);
 					platformButton.Superview?.SetNeedsLayout();
@@ -291,8 +264,10 @@ namespace CustomButtonLayout
 
 			platformButton.UpdatePadding(button);
 
-			if (!OperatingSystem.IsIOSVersionAtLeast(15))
+			if (config is null)
 			{
+				// ImageButton still will use the deprecated UIEdgeInsets for now.
+#pragma warning disable CA1422 // Validate platform compatibility
 				if (platformButton.ImageEdgeInsets != imageInsets ||
 					platformButton.TitleEdgeInsets != titleInsets)
 				{
@@ -300,6 +275,7 @@ namespace CustomButtonLayout
 					platformButton.TitleEdgeInsets = titleInsets;
 					platformButton.Superview?.SetNeedsLayout();
 				}
+#pragma warning restore CA1422 // Validate platform compatibility
 			}
 		}
 

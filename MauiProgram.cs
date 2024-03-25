@@ -19,6 +19,7 @@ public static class MauiProgram
 #if MACCATALYST
 				ButtonHandler.Mapper.ReplaceMapping<Button, IButtonHandler>(nameof(Button.ContentLayout), ButtonExtensions.MapContentLayout);
 				ButtonHandler.Mapper.ReplaceMapping<Button, IButtonHandler>(nameof(Button.Text), ButtonExtensions.MapText);
+				ButtonHandler.Mapper.ReplaceMapping<Button, IButtonHandler>(nameof(Button.TextTransform), ButtonExtensions.MapText);
 #elif WINDOWS
                 ButtonHandler.Mapper.AppendToMapping<Button, IButtonHandler>(nameof(Button.ContentLayout), CustomButton.MapContentLayout);
 
